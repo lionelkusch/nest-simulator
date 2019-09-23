@@ -33,7 +33,6 @@
 // Includes from topology:
 #include "generic_factory.h"
 #include "ntree.h"
-#include "position.h"
 
 namespace nest
 {
@@ -196,6 +195,12 @@ public:
   public:
     void execute( SLIInterpreter* ) const;
   } selectnodesbymask_L_a_Mfunction;
+
+  class SetMesh_i_iaFunction : public SLIFunction
+  {
+  public:
+    void execute( SLIInterpreter* ) const;
+  } setmesh_i_iafunction;
 
   typedef GenericFactory< AbstractMask > MaskFactory;
   typedef GenericFactory< AbstractMask >::CreatorFunction MaskCreatorFunction;

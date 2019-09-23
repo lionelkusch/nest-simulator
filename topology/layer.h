@@ -38,6 +38,7 @@
 
 // Includes from topology:
 #include "connection_creator.h"
+#include "displacement.h"
 #include "ntree.h"
 #include "position.h"
 #include "selector.h"
@@ -288,7 +289,7 @@ public:
    * @param to_pos    position to which displacement is to be computed
    * @returns vector pointing from from_pos to to_pos
    */
-  virtual Position< D > compute_displacement( const Position< D >& from_pos, const Position< D >& to_pos ) const;
+  virtual Displacement< D > compute_displacement( const Position< D >& from_pos, const Position< D >& to_pos ) const;
 
   /**
    * Returns displacement of node from given position. When using periodic
@@ -297,7 +298,7 @@ public:
    * @param to        node in layer to which displacement is to be computed
    * @returns vector pointing from from_pos to node to's position
    */
-  Position< D > compute_displacement( const Position< D >& from_pos, const index to ) const;
+  Displacement< D > compute_displacement( const Position< D >& from_pos, const index to ) const;
 
   std::vector< double > compute_displacement( const std::vector< double >& from_pos, const index to ) const;
 
@@ -611,7 +612,7 @@ inline Layer< D >::~Layer()
 }
 
 template < int D >
-inline Position< D >
+inline Displacement< D >
 Layer< D >::compute_displacement( const Position< D >& from_pos, const index to ) const
 {
   return compute_displacement( from_pos, get_position( to ) );
@@ -621,7 +622,7 @@ template < int D >
 inline std::vector< double >
 Layer< D >::compute_displacement( const std::vector< double >& from_pos, const index to ) const
 {
-  return std::vector< double >( compute_displacement( Position< D >( from_pos ), to ) );
+  return std::vector< double >( compute_displacement( Position< D >( from_pos ), to ).to_vector() );
 }
 
 template < int D >

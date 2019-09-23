@@ -89,6 +89,7 @@ __all__ = [
     'PlotLayer',
     'PlotTargets',
     'SelectNodesByMask',
+    'SetMesh'
 ]
 
 
@@ -2239,3 +2240,21 @@ def SelectNodesByMask(layer, anchor, mask_obj):
     gid_list = topology_func('SelectNodesByMask', layer[0], anchor, mask_datum)
 
     return gid_list
+
+
+def SetMesh(file):
+    """
+    Set the mesh use for compute the distance between neurons in all the next distance connection dependance.
+
+    Parameters
+    ----------
+    file : the path to the file of the mesh in format off
+
+    Returns
+    -------
+    0 (for mothing)
+
+    """
+    topology_func('SetMesh', file)
+
+    return 0

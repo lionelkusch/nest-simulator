@@ -40,6 +40,7 @@
 #include "dictutils.h"
 
 // Includes from topology:
+#include "displacement.h"
 #include "position.h"
 #include "topology_names.h"
 #include "topologymodule.h"
@@ -95,7 +96,7 @@ public:
    * @returns the value of the parameter at the given point.
    */
   double
-  value( const Position< 2 >& p, librandom::RngPtr& rng ) const
+  value( const Displacement< 2 >& p, librandom::RngPtr& rng ) const
   {
     double val = raw_value( p, rng );
     if ( val < cutoff_ )
@@ -112,7 +113,7 @@ public:
    * @returns the value of the parameter at the given point.
    */
   double
-  value( const Position< 3 >& p, librandom::RngPtr& rng ) const
+  value( const Displacement< 3 >& p, librandom::RngPtr& rng ) const
   {
     double val = raw_value( p, rng );
     if ( val < cutoff_ )
@@ -130,7 +131,7 @@ public:
    * @returns the value of the parameter at the given point.
    */
   virtual double
-  raw_value( const Position< 2 >&, librandom::RngPtr& ) const
+  raw_value( const Displacement< 2 >&, librandom::RngPtr& ) const
   {
     throw KernelException( "Parameter not valid for 2D layer" );
   }
@@ -140,7 +141,7 @@ public:
    * @returns the value of the parameter at the given point.
    */
   virtual double
-  raw_value( const Position< 3 >&, librandom::RngPtr& ) const
+  raw_value( const Displacement< 3 >&, librandom::RngPtr& ) const
   {
     throw KernelException( "Parameter not valid for 3D layer" );
   }
@@ -211,12 +212,12 @@ public:
    * @returns the constant value of this parameter.
    */
   double
-  raw_value( const Position< 2 >&, librandom::RngPtr& ) const
+  raw_value( const Displacement< 2 >&, librandom::RngPtr& ) const
   {
     return value_;
   }
   double
-  raw_value( const Position< 3 >&, librandom::RngPtr& ) const
+  raw_value( const Displacement< 3 >&, librandom::RngPtr& ) const
   {
     return value_;
   }
@@ -255,12 +256,12 @@ public:
   virtual double raw_value( double ) const = 0;
 
   double
-  raw_value( const Position< 2 >& p, librandom::RngPtr& ) const
+  raw_value( const Displacement< 2 >& p, librandom::RngPtr& ) const
   {
     return raw_value( p.length() );
   }
   double
-  raw_value( const Position< 3 >& p, librandom::RngPtr& ) const
+  raw_value( const Displacement< 3 >& p, librandom::RngPtr& ) const
   {
     return raw_value( p.length() );
   }
@@ -431,8 +432,15 @@ public:
   }
 
   double
-  raw_value( const Position< 3 >& pos, librandom::RngPtr& rng ) const
+  raw_value( const Displacement< 2 >& dep, librandom::RngPtr& rng ) const
   {
+    return raw_value( dep.to_vector(), rng );
+  }
+
+  double
+  raw_value( const Displacement< 3 >& dep, librandom::RngPtr& rng ) const
+  {
+    Position< 3 > pos = dep.to_vector();
     return raw_value( Position< 2 >( pos[ 0 ], pos[ 1 ] ), rng );
   }
 
@@ -536,13 +544,13 @@ public:
   }
 
   double
-  raw_value( const Position< 2 >&, librandom::RngPtr& rng ) const
+  raw_value( const Displacement< 2 >&, librandom::RngPtr& rng ) const
   {
     return lower_ + rng->drand() * range_;
   }
 
   double
-  raw_value( const Position< 3 >&, librandom::RngPtr& rng ) const
+  raw_value( const Displacement< 3 >&, librandom::RngPtr& rng ) const
   {
     return lower_ + rng->drand() * range_;
   }
@@ -611,13 +619,13 @@ public:
   }
 
   double
-  raw_value( const Position< 2 >&, librandom::RngPtr& rng ) const
+  raw_value( const Displacement< 2 >&, librandom::RngPtr& rng ) const
   {
     return raw_value( rng );
   }
 
   double
-  raw_value( const Position< 3 >&, librandom::RngPtr& rng ) const
+  raw_value( const Displacement< 3 >&, librandom::RngPtr& rng ) const
   {
     return raw_value( rng );
   }
@@ -687,13 +695,13 @@ public:
   }
 
   double
-  raw_value( const Position< 2 >&, librandom::RngPtr& rng ) const
+  raw_value( const Displacement< 2 >&, librandom::RngPtr& rng ) const
   {
     return raw_value( rng );
   }
 
   double
-  raw_value( const Position< 3 >&, librandom::RngPtr& rng ) const
+  raw_value( const Displacement< 3 >&, librandom::RngPtr& rng ) const
   {
     return raw_value( rng );
   }
@@ -737,13 +745,13 @@ public:
   }
 
   double
-  raw_value( const Position< D xor 1 >&, librandom::RngPtr& ) const
+  raw_value( const Displacement< D xor 1 >&, librandom::RngPtr& ) const
   {
     throw BadProperty( "Incorrect dimension." );
   }
 
   double
-  raw_value( const Position< D >& p, librandom::RngPtr& rng ) const
+  raw_value( const Displacement< D >& p, librandom::RngPtr& rng ) const
   {
     return p_->raw_value( p - anchor_, rng );
   }
@@ -796,12 +804,12 @@ public:
    * @returns the value of the product.
    */
   double
-  raw_value( const Position< 2 >& p, librandom::RngPtr& rng ) const
+  raw_value( const Displacement< 2 >& p, librandom::RngPtr& rng ) const
   {
     return parameter1_->value( p, rng ) * parameter2_->value( p, rng );
   }
   double
-  raw_value( const Position< 3 >& p, librandom::RngPtr& rng ) const
+  raw_value( const Displacement< 3 >& p, librandom::RngPtr& rng ) const
   {
     return parameter1_->value( p, rng ) * parameter2_->value( p, rng );
   }
@@ -853,12 +861,12 @@ public:
    * @returns the value of the product.
    */
   double
-  raw_value( const Position< 2 >& p, librandom::RngPtr& rng ) const
+  raw_value( const Displacement< 2 >& p, librandom::RngPtr& rng ) const
   {
     return parameter1_->value( p, rng ) / parameter2_->value( p, rng );
   }
   double
-  raw_value( const Position< 3 >& p, librandom::RngPtr& rng ) const
+  raw_value( const Displacement< 3 >& p, librandom::RngPtr& rng ) const
   {
     return parameter1_->value( p, rng ) / parameter2_->value( p, rng );
   }
@@ -910,12 +918,12 @@ public:
    * @returns the value of the sum.
    */
   double
-  raw_value( const Position< 2 >& p, librandom::RngPtr& rng ) const
+  raw_value( const Displacement< 2 >& p, librandom::RngPtr& rng ) const
   {
     return parameter1_->value( p, rng ) + parameter2_->value( p, rng );
   }
   double
-  raw_value( const Position< 3 >& p, librandom::RngPtr& rng ) const
+  raw_value( const Displacement< 3 >& p, librandom::RngPtr& rng ) const
   {
     return parameter1_->value( p, rng ) + parameter2_->value( p, rng );
   }
@@ -967,12 +975,12 @@ public:
    * @returns the value of the difference.
    */
   double
-  raw_value( const Position< 2 >& p, librandom::RngPtr& rng ) const
+  raw_value( const Displacement< 2 >& p, librandom::RngPtr& rng ) const
   {
     return parameter1_->value( p, rng ) - parameter2_->value( p, rng );
   }
   double
-  raw_value( const Position< 3 >& p, librandom::RngPtr& rng ) const
+  raw_value( const Displacement< 3 >& p, librandom::RngPtr& rng ) const
   {
     return parameter1_->value( p, rng ) - parameter2_->value( p, rng );
   }
@@ -1021,12 +1029,12 @@ public:
    * @returns the value of the parameter.
    */
   double
-  raw_value( const Position< 2 >& p, librandom::RngPtr& rng ) const
+  raw_value( const Displacement< 2 >& p, librandom::RngPtr& rng ) const
   {
     return p_->raw_value( -p, rng );
   }
   double
-  raw_value( const Position< 3 >& p, librandom::RngPtr& rng ) const
+  raw_value( const Displacement< 3 >& p, librandom::RngPtr& rng ) const
   {
     return p_->raw_value( -p, rng );
   }

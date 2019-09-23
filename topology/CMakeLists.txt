@@ -25,6 +25,7 @@ set( topo_sources
     connection_creator.h
     connection_creator_impl.h
     connection_creator.cpp
+    displacement.h
     generic_factory.h
     position.h
     layer.h
@@ -48,7 +49,8 @@ set( topo_sources
     )
 
 add_library( topology ${topo_sources} )
-target_link_libraries( topology nestutil sli_lib random nestkernel )
+set(DEFINES "${DEFINES} CGAL_DISABLE_ROUNDING_MATH_CHECK=ON")
+target_link_libraries( topology nestutil sli_lib random nestkernel gmp gmpxx CGAL)
 
 target_include_directories( topology PRIVATE
     ${PROJECT_SOURCE_DIR}/libnestutil

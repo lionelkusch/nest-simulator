@@ -70,7 +70,7 @@ ConnectionCreator::connect( Layer< D >& source, Layer< D >& target )
 
 template < int D >
 void
-ConnectionCreator::get_parameters_( const Position< D >& pos, librandom::RngPtr rng, double& weight, double& delay )
+ConnectionCreator::get_parameters_( const Displacement< D >& pos, librandom::RngPtr rng, double& weight, double& delay )
 {
   // keeping this function temporarily until all connection variants are cleaned
   // up
@@ -99,7 +99,7 @@ ConnectionCreator::connect_to_target_( Iterator from,
 
     if ( without_kernel or rng->drand() < kernel_->value( source.compute_displacement( tgt_pos, iter->first ), rng ) )
     {
-      const Position< D > disp = source.compute_displacement( tgt_pos, iter->first );
+      const Displacement< D > disp = source.compute_displacement( tgt_pos, iter->first );
       connect_(
         iter->second, tgt_ptr, tgt_thread, weight_->value( disp, rng ), delay_->value( disp, rng ), synapse_model_ );
     }
@@ -751,7 +751,7 @@ ConnectionCreator::divergent_connect_( Layer< D >& source, Layer< D >& target )
     Position< D > source_pos = src_it->first;
     index source_id = src_it->second;
     std::vector< index > targets;
-    std::vector< Position< D > > displacements;
+    std::vector< Displacement< D > > displacements;
     std::vector< double > probabilities;
 
     // Find potential targets and probabilities
@@ -766,7 +766,7 @@ ConnectionCreator::divergent_connect_( Layer< D >& source, Layer< D >& target )
         continue;
       }
 
-      Position< D > target_displ = target.compute_displacement( source_pos, tgt_it->first );
+      Displacement< D > target_displ = target.compute_displacement( source_pos, tgt_it->first );
       librandom::RngPtr rng = get_global_rng();
 
       targets.push_back( tgt_it->second );
@@ -806,7 +806,7 @@ ConnectionCreator::divergent_connect_( Layer< D >& source, Layer< D >& target )
         continue;
       }
       is_selected[ random_id ] = true;
-      Position< D > target_displ = displacements[ random_id ];
+      Displacement< D > target_displ = displacements[ random_id ];
       index target_id = targets[ random_id ];
 
       double w, d;

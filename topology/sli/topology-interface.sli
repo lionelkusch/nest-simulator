@@ -162,7 +162,11 @@
   /SelectNodesByMask [/integertype /arraytype /masktype]
     /SelectNodesByMask_L_a_M load
   def
-  
+
+   /SetMesh [/stringtype]
+    /SetMesh_i_ia load
+  def
+
 } def
 
 % define functions in global namespace

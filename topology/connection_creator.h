@@ -30,6 +30,7 @@
 #include "kernel_manager.h"
 
 // Includes from topology:
+#include "displacement.h"
 #include "mask.h"
 #include "position.h"
 #include "selector.h"
@@ -163,7 +164,7 @@ private:
    * TODO: remove when all four connection variants are refactored
    */
   template < int D >
-  void get_parameters_( const Position< D >& pos, librandom::RngPtr rng, double& weight, double& delay );
+  void get_parameters_( const Displacement< D >& pos, librandom::RngPtr rng, double& weight, double& delay );
 
   ConnectionType type_;
   bool allow_autapses_;

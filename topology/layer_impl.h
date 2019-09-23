@@ -31,6 +31,8 @@
 // Includes from topology:
 #include "grid_layer.h"
 #include "grid_mask.h"
+#include "position.h"
+#include "displacement.h"
 
 namespace nest
 {
@@ -45,22 +47,10 @@ template < int D >
 Selector Layer< D >::cached_selector_;
 
 template < int D >
-Position< D >
+Displacement< D >
 Layer< D >::compute_displacement( const Position< D >& from_pos, const Position< D >& to_pos ) const
 {
-  Position< D > displ = to_pos - from_pos;
-  for ( int i = 0; i < D; ++i )
-  {
-    if ( periodic_[ i ] )
-    {
-      displ[ i ] = -0.5 * extent_[ i ] + std::fmod( displ[ i ] + 0.5 * extent_[ i ], extent_[ i ] );
-      if ( displ[ i ] < -0.5 * extent_[ i ] )
-      {
-        displ[ i ] += extent_[ i ];
-      }
-    }
-  }
-  return displ;
+  return Displacement<D>(from_pos,to_pos,periodic_,extent_);
 }
 
 template < int D >

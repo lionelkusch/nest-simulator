@@ -42,6 +42,7 @@
 
 // Includes from topology:
 #include "connection_creator_impl.h"
+#include "displacement.h"
 #include "free_layer.h"
 #include "grid_layer.h"
 #include "grid_mask.h"
@@ -362,6 +363,8 @@ TopologyModule::init( SLIInterpreter* i )
   i->createcommand( "cvdict_M", &cvdict_Mfunction );
 
   i->createcommand( "SelectNodesByMask_L_a_M", &selectnodesbymask_L_a_Mfunction );
+
+  i->createcommand( "SetMesh_i_ia", &setmesh_i_iafunction);
 
   kernel().model_manager.register_node_model< FreeLayer< 2 > >( "topology_layer_free" );
   kernel().model_manager.register_node_model< FreeLayer< 3 > >( "topology_layer_free_3d" );
@@ -1252,6 +1255,38 @@ TopologyModule::SelectNodesByMask_L_a_MFunction::execute( SLIInterpreter* i ) co
   i->EStack.pop();
 }
 
+/** @BeginDocumentation
+  Name: topology::SetMesh - define the topology for the distance
+
+  Synopsis: path_mesh SetMesh
+
+  Parameters:
+
+  path_mesh     - path to the mesh file in the format off
+
+
+  Description:
+  Set the mesh of the sheet of the neurons. The next connection disance dependant will be dependant of this mesh.
+
+  Examples:
+    topology using
+
+    (./my_mesh.off) SetMesh
+
+  Author: Kusch Lionel
+*/
+
+void
+TopologyModule::SetMesh_i_iaFunction::execute( SLIInterpreter* i ) const
+{
+  i->assert_stack_load( 1 );
+
+  std::string path = getValue< std::string >( i->OStack.pick( 0 ) );
+  Displacement<3>().define_mesh(path);
+
+  i->OStack.pop(1);
+  i->EStack.pop();
+}
 
 std::string
 LayerExpected::message() const
