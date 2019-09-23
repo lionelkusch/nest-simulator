@@ -286,6 +286,28 @@ TopologyModule::create_parameter( const Name& name, const DictionaryDatum& d )
     param = aparam;
   }
 
+  // Wrap the parameter object created above in an ScalingParameter if
+  // the dictionary contains a scaling
+  if ( d->known( names::scaling ) )
+  {
+    std::vector< double > scaling = getValue< std::vector< double > >( d, names::scaling );
+    TopologyParameter* aparam;
+    switch ( scaling.size() )
+    {
+    case 2:
+      aparam = new ScalingParameter< 2 >( *param, scaling );
+      break;
+    case 3:
+      aparam = new ScalingParameter< 3 >( *param, scaling );
+      break;
+    default:
+      throw BadProperty( "Scaling must be 2- or 3-dimensional." );
+    }
+
+    delete param;
+    param = aparam;
+  }
+
   return param;
 }
 

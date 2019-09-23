@@ -768,6 +768,58 @@ private:
 };
 
 /**
+ * Parameter class representing a parameter centered at an scaling position.
+ */
+template < int D >
+class ScalingParameter : public TopologyParameter
+{
+public:
+  ScalingParameter( const TopologyParameter& p, const std::vector< double >& scaling )
+    : TopologyParameter( p )
+    , p_( p.clone() )
+    , scaling_( scaling )
+  {
+  }
+
+  ScalingParameter( const ScalingParameter& p )
+    : TopologyParameter( p )
+    , p_( p.p_->clone() )
+    , scaling_( p.scaling_ )
+  {
+  }
+
+  ~ScalingParameter()
+  {
+    delete p_;
+  }
+
+  double
+  raw_value( const Displacement< D xor 1 >&, librandom::RngPtr& ) const
+  {
+    throw BadProperty( "Incorrect dimension." );
+  }
+
+  double
+  raw_value( const Displacement< D >& p, librandom::RngPtr& rng ) const
+  {
+    Displacement< D > p2(p);
+    p2.scaling(scaling_);
+    return p_->raw_value( p2, rng );
+  }
+
+  TopologyParameter*
+  clone() const
+  {
+    return new ScalingParameter( *this );
+  }
+
+private:
+  TopologyParameter* p_;
+  std::vector< double > scaling_;
+};
+
+
+/**
  * Parameter class representing the product of two parameters
  */
 class ProductParameter : public TopologyParameter

@@ -86,6 +86,7 @@ extern const Name radius;
 extern const Name rectangular;
 extern const Name row;
 extern const Name rows;
+extern const Name scaling;
 extern const Name sigma_x;
 extern const Name sigma_y;
 extern const Name sources;

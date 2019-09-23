@@ -94,6 +94,11 @@ public:
    */
   Displacement operator-( const Position< D, T >& anchor ) const;
 
+   /**
+   * scale the source point
+   */
+  void scaling( const std::vector< double >& scale);
+
   /**
    * Define the mesh if the distance is dependant of it
    */
@@ -212,6 +217,16 @@ inline Displacement< D, T > Displacement< D, T >::operator-( const Position< D, 
                                 this->periodic_,
                                 this->extent_);
   return d;
+}
+
+template < int D, class T >
+inline void Displacement< D, T >::scaling( const std::vector< double >& scale){
+    for (int i=0;i<D;i++)
+    {
+        p_source_[i]=p_source_[i]*scale[i];
+    }
+//    std::cout<<" after"<<std::endl;
+//    std::cout<<p_source_<<std::endl;
 }
 
 template < int D, class T >
