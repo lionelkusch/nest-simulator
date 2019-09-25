@@ -191,7 +191,14 @@ public:
   get_bbox() const
   {
     const double inf = std::numeric_limits< double >::infinity();
-    return Box< D >( Position< D >( -inf, -inf ), Position< D >( inf, inf ) );
+    Position< D > p;
+    Position< D > p1;
+    for (int i=0;i<D;i++)
+    {
+        p[i]=-inf;
+        p1[i]=inf;
+    }
+    return Box< D >( p,p1 );
   }
 
   Mask< D >*
