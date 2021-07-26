@@ -341,7 +341,7 @@ nest::StimulatingBackendMPI::get_port( const index index_node, const std::string
     throw MPIPortsFileUnknown( index_node );
   }
   // add the id of the device to the path
-  basename << "/" << index_node << ".txt";
+  basename << ".txt";
   std::cout << basename.rdbuf() << std::endl;
   std::ifstream file( basename.str() );
 
