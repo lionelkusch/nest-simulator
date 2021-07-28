@@ -277,6 +277,7 @@ nest::StimulatingBackendMPI::cleanup()
     {
       bool value[ 1 ] = { true };
       MPI_Send( value, 1, MPI_CXX_BOOL, 0, 2, *std::get< 0 >( it_comm.second ) );
+      MPI_Barrier(*std::get< 0 >( it_comm.second ));
       MPI_Comm_disconnect( std::get< 0 >( it_comm.second ) );
       delete std::get< 0 >( it_comm.second );
       delete std::get< 1 >( it_comm.second );
