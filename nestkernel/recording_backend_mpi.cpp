@@ -383,7 +383,7 @@ nest::RecordingBackendMPI::get_port( const index index_node, const std::string& 
     throw MPIPortsFileUnknown( index_node );
   }
 
-  basename << "/" << index_node << ".txt";
+  basename << ".txt";
   std::cout << basename.str() << std::endl;
   std::ifstream file( basename.str() );
   if ( file.is_open() )
