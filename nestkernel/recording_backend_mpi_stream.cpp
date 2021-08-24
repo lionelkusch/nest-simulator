@@ -240,5 +240,5 @@ nest::RecordingBackendMPIStream::send_data( const MPI_Comm* comm, const int data
   int shape = { size };
   // Receive the data ( for the moment only spike time )
   MPI_Send( data, shape, MPI_INT, 0, tag, *comm );
-  std::cout<<"NEST :"<<data<<std::endl; std::cout.flush();
+//  std::cout<<"NEST :"<<data[0]<<std::endl; std::cout.flush();
 }
