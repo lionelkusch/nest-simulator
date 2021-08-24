@@ -148,18 +148,20 @@ protected:
   typedef std::map< std::string, std::tuple< int, MPI_Comm*, int > > comm_map;
   comm_map commMap_;
 
+  static void get_port( const RecordingDevice* device, std::string* port_name );
+  static void get_port( index index_node, const std::string& label, std::string* port_name );
+
   /**
    * A map for the enrolled devices. We have a vector with one map per local
    * thread. The map associates the node ID of a device on a given thread
    * with its MPI index and device. Only the master thread has a valid MPI communicator pointer.
   */
-  typedef std::vector< std::map< index, std::tuple< int, MPI_Comm*, const RecordingDevice* > > > device_map;
+  typedef std::vector< std::map< index, std::tuple< int, MPI_Comm*, const RecordingDevice*, int > > > device_map;
   device_map devices_;
-  static void get_port( const RecordingDevice* device, std::string* port_name );
-  static void get_port( index index_node, const std::string& label, std::string* port_name );
 
 
 private:
+
   /**
    * Buffer for saving events before they are sent.
    * The buffer has 3 dimensions : thread_id, MPI_communicator_index and number of events

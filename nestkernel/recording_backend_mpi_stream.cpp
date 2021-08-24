@@ -34,7 +34,7 @@ void
 nest::RecordingBackendMPIStream::initialize()
 {
   auto nthreads = kernel().vp_manager.get_num_threads();
-  std::vector< std::vector< int > > empty_vector( nthreads );
+  std::vector< std::vector <std::vector< int > > > empty_vector( nthreads );
   buffer_stream_.swap( empty_vector );
   device_map devices( nthreads );
   devices_.swap( devices );
@@ -73,11 +73,13 @@ nest::RecordingBackendMPIStream::prepare()
     auto comm_it = commMap_.find( port_name );
     MPI_Comm* comm;
     int index_mpi;
+    int index_device;
     if ( comm_it != commMap_.end() )
     {
       comm = std::get< 1 >( comm_it->second );
       std::get< 2 >( comm_it->second ) += 1;
       index_mpi = std::get< 0 >( comm_it->second );
+      index_device =  std::get< 2 >( comm_it->second );
     }
     else
     {
@@ -85,16 +87,23 @@ nest::RecordingBackendMPIStream::prepare()
       std::tuple< int, MPI_Comm*, int > comm_count = std::make_tuple( count_max, comm, 1 );
       commMap_.insert( std::make_pair( port_name, comm_count ) );
       index_mpi = count_max;
+      index_device = 1;
       count_max += 1;
     }
     std::get< 0 >( it_device.second ) = index_mpi;
     std::get< 1 >( it_device.second ) = comm;
+    std::get< 3 >( it_device.second ) = index_device-1;
   }
 
   // initialize the buffer
   for ( auto& thread_data : buffer_stream_ )
   {
-    std::vector< int > data_comm( count_max );
+    std::vector< std::vector< int > > data_comm;
+    for ( auto it_comm:commMap_ )
+    {
+      std::vector< int > empty_vector( std::get< 2 >( it_comm.second ) );
+      data_comm.push_back( empty_vector );
+    }
     thread_data.swap( data_comm );
   }
 
@@ -121,6 +130,7 @@ nest::RecordingBackendMPIStream::prepare()
         auto device_data = devices_[ thread_id_master ].find( it_device.first );
         std::get< 0 >( it_device.second ) = std::get< 0 >( device_data->second );
         std::get< 1 >( it_device.second ) = std::get< 1 >( device_data->second );
+        std::get< 3 >( it_device.second ) = std::get< 3 >( device_data->second );
       }
     }
   }
@@ -142,26 +152,29 @@ nest::RecordingBackendMPIStream::post_step_hook()
   {
     step_+=1;
     // Receive information of MPI process
+    int j = 0;
     for ( auto& it_comm : commMap_ )
     {
-      std::vector< int > data;
+      std::vector< int > data(std::get< 2 >( it_comm.second ));
       for ( auto& data_thread : buffer_stream_ )
       {
-        data.push_back(0);
-        for ( auto& data_sample : data_thread )
+        int i = 0;
+        for ( auto& data_value : data_thread[j] )
         {
-          data.back() += data_sample;
+          data[i]+= data_value;
+          i+=1;
         }
       }
       send_data( std::get< 1 >( it_comm.second ),  data.data(), data.size(), step_);
-    }
-    // clear the buffer
-    for ( auto& data_thread : buffer_stream_ )
-    {
-      for ( auto& data_sample : data_thread )
+      // clear the buffer
+      for ( auto& data_thread : buffer_stream_ )
       {
-        data_sample=0;
+        for ( auto& data_value : data_thread[j] )
+        {
+          data_value = 0.0;
+        }
       }
+      j+=1;
     }
     // Send information about the end of the running part
   }
@@ -194,6 +207,10 @@ nest::RecordingBackendMPIStream::cleanup()
     // clear the buffer
     for ( auto& data_thread : buffer_stream_ )
     {
+      for ( auto data_comm:data_thread)
+      {
+        data_comm.clear();
+      }
       data_thread.clear();
     }
     // clear map of device
@@ -221,7 +238,7 @@ nest::RecordingBackendMPIStream::write( const RecordingDevice& device,
   auto it_devices = devices_[ thread_id ].find( recorder );
   if ( it_devices != devices_[ thread_id ].end() )
   {
-    buffer_stream_[ thread_id ][ std::get< 0 >( it_devices->second ) ] += \
+    buffer_stream_[ thread_id ][ std::get< 0 >( it_devices->second ) ][ std::get< 3 >( it_devices->second ) ] += \
       reinterpret_cast < const SpikeEvent*> (&event)->get_multiplicity();
   }
   else

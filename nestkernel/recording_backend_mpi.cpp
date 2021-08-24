@@ -82,7 +82,7 @@ nest::RecordingBackendMPI::enroll( const RecordingDevice& device, const Dictiona
       devices_[ tid ].erase( device_it );
     }
 
-    std::tuple< int, MPI_Comm*, const RecordingDevice* > tuple = std::make_tuple( -1, nullptr, &device );
+    std::tuple< int, MPI_Comm*, const RecordingDevice*, int > tuple = std::make_tuple( -1, nullptr, &device, -1 );
     devices_[ tid ].insert( std::make_pair( node_id, tuple ) );
     enrolled_ = true;
   }

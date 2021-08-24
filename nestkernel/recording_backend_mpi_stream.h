@@ -120,7 +120,7 @@ private:
    * elements. The events elements are described as an array with three components: id of device, id of neurons and data
    * ( one double )
    */
-  std::vector< std::vector< int > > buffer_stream_;
+  std::vector< std::vector < std::vector< int > > > buffer_stream_;
 
   int step_;
 };
