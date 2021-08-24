@@ -85,6 +85,7 @@ public:
    * Clean up in all registered recording backends after a single simulation
    * step by calling the backends' post_step_hook() functions
    */
+  void pre_step_hook();
   void post_step_hook();
 
   /**

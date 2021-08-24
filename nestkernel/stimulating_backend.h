@@ -146,6 +146,8 @@ public:
    */
   virtual void pre_run_hook() = 0;
 
+  virtual void pre_step_hook() = 0;
+
   /**
    * Clean up the backend at the end of a Run.
    *

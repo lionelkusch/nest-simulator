@@ -128,6 +128,7 @@ public:
   {
     CURRENT_GENERATOR,
     SPIKE_GENERATOR,
+    STREAM_SPIKE_GENERATOR,
     DOUBLE_DATA_GENERATOR,
     DELAYED_RATE_CONNECTION_GENERATOR,
   };
@@ -139,6 +140,7 @@ public:
   };
   const std::string& get_label() const;
   virtual void set_data_from_stimulating_backend( std::vector< double >& ){};
+  virtual void set_data_from_stream_stimulating_backend( double& ){};
   void update( Time const&, const long, const long ) override{};
 
 protected:

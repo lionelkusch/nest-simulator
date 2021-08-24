@@ -96,6 +96,7 @@
 #include "poisson_generator.h"
 #include "poisson_generator_ps.h"
 #include "inhomogeneous_poisson_generator.h"
+#include "stream_inhomogeneous_poisson_generator.h"
 #include "ppd_sup_generator.h"
 #include "pulsepacket_generator.h"
 #include "sinusoidal_gamma_generator.h"
@@ -238,6 +239,7 @@ ModelsModule::init( SLIInterpreter* )
   kernel().model_manager.register_node_model< dc_generator >( "dc_generator" );
   kernel().model_manager.register_node_model< spike_generator >( "spike_generator" );
   kernel().model_manager.register_node_model< inhomogeneous_poisson_generator >( "inhomogeneous_poisson_generator" );
+  kernel().model_manager.register_node_model< stream_inhomogeneous_poisson_generator >( "stream_inhomogeneous_poisson_generator" );
   kernel().model_manager.register_node_model< poisson_generator >( "poisson_generator" );
   kernel().model_manager.register_node_model< poisson_generator_ps >( "poisson_generator_ps" );
   kernel().model_manager.register_node_model< pulsepacket_generator >( "pulsepacket_generator" );

@@ -93,6 +93,7 @@ set( models_sources
     parrot_neuron.h parrot_neuron.cpp
     parrot_neuron_ps.cpp parrot_neuron_ps.h
     inhomogeneous_poisson_generator.h inhomogeneous_poisson_generator.cpp
+    stream_inhomogeneous_poisson_generator.h stream_inhomogeneous_poisson_generator.cpp
     poisson_generator.h poisson_generator.cpp
     poisson_generator_ps.cpp poisson_generator_ps.h
     pp_psc_delta.h pp_psc_delta.cpp

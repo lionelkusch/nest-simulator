@@ -47,7 +47,9 @@
 #endif
 #ifdef HAVE_MPI
 #include "recording_backend_mpi.h"
+#include "recording_backend_mpi_stream.h"
 #include "stimulating_backend_mpi.h"
+#include "stimulating_backend_mpi_stream.h"
 #endif
 #ifdef HAVE_SIONLIB
 #include "recording_backend_sionlib.h"
@@ -247,6 +249,15 @@ IOManager::post_run_hook()
 }
 
 void
+IOManager::pre_step_hook()
+{
+  for ( auto& it : stimulating_backends_ )
+  {
+    it.second->pre_step_hook();
+  }
+}
+
+void
 IOManager::post_step_hook()
 {
   for ( auto& it : recording_backends_ )
@@ -393,6 +404,7 @@ IOManager::register_recording_backends_()
 #endif
 #ifdef HAVE_MPI
   recording_backends_.insert( std::make_pair( "mpi", new RecordingBackendMPI() ) );
+  recording_backends_.insert( std::make_pair( "mpi-stream", new RecordingBackendMPIStream() ) );
 #endif
 #ifdef HAVE_SIONLIB
   recording_backends_.insert( std::make_pair( "sionlib", new RecordingBackendSIONlib() ) );
@@ -404,6 +416,7 @@ IOManager::register_stimulating_backends_()
 {
 #ifdef HAVE_MPI
   stimulating_backends_.insert( std::make_pair( "mpi", new StimulatingBackendMPI() ) );
+  stimulating_backends_.insert( std::make_pair( "mpi-stream", new StimulatingBackendMPIStream() ) );
 #endif
 }
 

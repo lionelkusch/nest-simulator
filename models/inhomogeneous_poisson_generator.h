@@ -122,6 +122,17 @@ public:
   StimulatingDevice::Type get_type() const override;
   void set_data_from_stimulating_backend( std::vector< double >& input_param ) override;
 
+protected:
+  void event_hook( DSSpikeEvent& ) override;
+  // ------------------------------------------------------------
+  struct Variables_
+  {
+    poisson_distribution poisson_dist_; //!< poisson distribution
+    double h_;                          //! time resolution (ms)
+  };
+  // ------------------------------------------------------------
+  Variables_ V_;
+
 
 private:
   void init_state_( const Node& ) override;
@@ -129,7 +140,6 @@ private:
   void calibrate() override;
 
   void update( Time const&, const long, const long ) override;
-  void event_hook( DSSpikeEvent& ) override;
 
   struct Buffers_;
 
@@ -165,17 +175,8 @@ private:
 
   // ------------------------------------------------------------
 
-  struct Variables_
-  {
-    poisson_distribution poisson_dist_; //!< poisson distribution
-    double h_;                          //! time resolution (ms)
-  };
-
-  // ------------------------------------------------------------
-
   Parameters_ P_;
   Buffers_ B_;
-  Variables_ V_;
 };
 
 inline port

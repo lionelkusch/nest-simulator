@@ -135,7 +135,9 @@ if ( HAVE_MPI )
   set( nestkernel_sources
     ${nestkernel_sources}
     recording_backend_mpi.h recording_backend_mpi.cpp
+    recording_backend_mpi_stream.h recording_backend_mpi_stream.cpp
     stimulating_backend_mpi.h stimulating_backend_mpi.cpp
+    stimulating_backend_mpi_stream.h stimulating_backend_mpi_stream.cpp
   )
 endif ()
 
