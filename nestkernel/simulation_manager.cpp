@@ -990,6 +990,7 @@ nest::SimulationManager::update_()
         }
       }
 
+      kernel().io_manager.pre_step_hook();
 #pragma omp barrier
 #ifdef TIMER_DETAILED
       if ( tid == 0 )

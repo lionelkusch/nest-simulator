@@ -315,7 +315,7 @@ nest::StimulatingBackendMPI::get_port( const index index_node, const std::string
   }
   // add the id of the device to the path
   basename << ".txt";
-  std::cout << basename.rdbuf() << std::endl;
+  std::cout << basename.str() << std::endl;
   std::ifstream file( basename.str() );
 
   // read the file

@@ -41,6 +41,7 @@ class stream_inhomogeneous_poisson_generator : public inhomogeneous_poisson_gene
 {
 
 public:
+  void update( Time const& origin, const long from, const long to )  override;
   void set_data_from_stream_stimulating_backend( double& rate ) override;
   StimulatingDevice::Type get_type() const override;
 

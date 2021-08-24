@@ -127,6 +127,7 @@ nest::StimulatingBackendMPIStream::prepare()
     msg << "Connect to " << it_comm.first.data() << "\n";
     LOG( M_INFO, "MPI Input connect", msg.str() );
   }
+  step_ = 1;
 }
 
 void
@@ -149,7 +150,7 @@ nest::StimulatingBackendMPIStream::pre_step_hook()
       MPI_Status status_mpi;
       int shape = { *std::get<2>(it_comm.second) };
       double* data_receive{ new double[ shape ]{} };
-      MPI_Recv( data_receive, shape, MPI_DOUBLE, 0, 0, *std::get< 0 >( it_comm.second), &status_mpi );
+      MPI_Recv( data_receive, shape, MPI_DOUBLE, 0, step_, *std::get< 0 >( it_comm.second), &status_mpi );
       data[index] = data_receive;
       index += 1;
     }
@@ -175,6 +176,7 @@ nest::StimulatingBackendMPIStream::pre_step_hook()
     data = nullptr;
   }
 #pragma omp barrier
+  step_+=1;
 }
 
 void

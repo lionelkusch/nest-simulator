@@ -27,6 +27,7 @@
 // Includes from libnestutil:
 
 // Includes from nestkernel:
+#include "event_delivery_manager_impl.h"
 #include "kernel_manager.h"
 
 // Includes from sli:
@@ -34,6 +35,13 @@
 /* ----------------------------------------------------------------
  * Update function and event hook
  * ---------------------------------------------------------------- */
+void
+nest::stream_inhomogeneous_poisson_generator::update( Time const& origin, const long from, const long to )
+{
+  // not update by nest itself only by the background
+}
+
+
 void
 nest::stream_inhomogeneous_poisson_generator::event_hook( DSSpikeEvent& e )
 {
@@ -54,4 +62,10 @@ void
 nest::stream_inhomogeneous_poisson_generator::set_data_from_stream_stimulating_backend( double& rate )
 {
   rate_ = rate;
+  // create spikes
+  if ( rate_ > 0 )
+  {
+    DSSpikeEvent se;
+    kernel().event_delivery_manager.send( *this, se, 0.0 );
+  }
 }

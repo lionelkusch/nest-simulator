@@ -128,6 +128,8 @@ private:
    */
   void clean_memory_input_data( double** data );
 
+  int step_;
+
 };
 
 } // namespace
