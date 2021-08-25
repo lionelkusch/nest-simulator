@@ -60,12 +60,8 @@ nest::StimulatingBackendMPIStream::prepare()
       // it's not a new communicator
       comm = std::get< 0 >( comm_it->second );
       // add the id of the device if there are a connection with the device.
-      if ( kernel().connection_manager.get_device_connected(
-        thread_id_master, it_device.second.second->get_local_device_id() ) )
-      {
-        std::get< 1 >( comm_it->second )->push_back( it_device.second.second->get_node_id() );
-        std::get< 2 >( comm_it->second )[ thread_id_master ] += 1;
-      }
+      std::get< 1 >( comm_it->second )->push_back( it_device.second.second->get_node_id() );
+      std::get< 2 >( comm_it->second )[ thread_id_master ] += 1;
     }
     else
     {
@@ -90,31 +86,6 @@ nest::StimulatingBackendMPIStream::prepare()
     it_device.second.first = comm;
   }
 
-  // Add the id of device of the other thread in the vector_id_device and update the count of all device
-  for ( int id_thread = 0; id_thread < kernel().vp_manager.get_num_threads(); id_thread++ )
-  {
-    // don't do it again for the master thread
-    if ( id_thread != thread_id_master )
-    {
-      for ( auto& it_device : devices_[ id_thread ] )
-      {
-        std::string port_name;
-        get_port( it_device.second.second, &port_name );
-        auto comm_it = commMap_.find( port_name );
-        if ( comm_it != commMap_.end() )
-        {
-          std::get< 1 >( comm_it->second )->push_back( it_device.second.second->get_node_id() );
-          std::get< 2 >( comm_it->second )[ id_thread ] += 1;
-        }
-        else
-        {
-          // should be impossible
-          throw KernelException( "The MPI port was not defined in the master thread" );
-        }
-      }
-    }
-  }
-
   // 2) connect the master thread to the MPI process it needs to be connected to
   for ( auto& it_comm : commMap_ )
   {
@@ -128,6 +99,8 @@ nest::StimulatingBackendMPIStream::prepare()
     LOG( M_INFO, "MPI Input connect", msg.str() );
   }
   step_ = 1;
+  double** data = { new double*[ commMap_.size() ]{} };
+  data_ = &data;
 }
 
 void
@@ -139,10 +112,9 @@ nest::StimulatingBackendMPIStream::pre_run_hook()
 void
 nest::StimulatingBackendMPIStream::pre_step_hook()
 {
-  auto data{ new double*[ commMap_.size() ]{} };
-  int index = 0;
 #pragma omp master
   {
+    int index = 0;
     // receive all the information from all the MPI connections
     for ( auto& it_comm : commMap_ )
     {
@@ -151,32 +123,26 @@ nest::StimulatingBackendMPIStream::pre_step_hook()
       int shape = { *std::get<2>(it_comm.second) };
       double* data_receive{ new double[ shape ]{} };
       MPI_Recv( data_receive, shape, MPI_DOUBLE, 0, step_, *std::get< 0 >( it_comm.second), &status_mpi );
-      data[index] = data_receive;
+      (*data_)[index] = data_receive;
       index += 1;
     }
+    step_+=1;
   }
 #pragma omp barrier
-  comm_map* communication_map_shared = &commMap_;
-#pragma omp parallel default( none ) shared( data, communication_map_shared )
+  // Each thread updates its own devices.
+  int index_it = 0;
+  for ( auto& it_comm : commMap_ )
   {
-    // Each thread updates its own devices.
-    int index_it = 0;
-    for ( auto& it_comm : *communication_map_shared )
-    {
-      update_device( *std::get< 1 >( it_comm.second ), data[ index_it ] );
-      index_it += 1;
-    }
+    update_device( *std::get< 1 >( it_comm.second ), ( *data_)[ index_it ] );
+    index_it += 1;
   }
 #pragma omp barrier
 #pragma omp master
   {
-    // Master thread cleans all the allocated memory
-    clean_memory_input_data( data );
-    delete[] data;
-    data = nullptr;
+   for (int i=0; i < (int) commMap_.size(); i++){
+     delete[] (*data_)[i];
+   }
   }
-#pragma omp barrier
-  step_+=1;
 }
 
 void
@@ -186,23 +152,44 @@ nest::StimulatingBackendMPIStream::post_run_hook()
 }
 
 void
+nest::StimulatingBackendMPIStream::cleanup()
+{
+// Disconnect all the MPI connection and send information about this disconnection
+// Clean all the elements in the map
+// disconnect MPI message
+#pragma omp master
+  {
+    for ( auto& it_comm : commMap_ )
+    {
+      bool value[ 1 ] = { true };
+      MPI_Send( value, 1, MPI_CXX_BOOL, 0, 2, *std::get< 0 >( it_comm.second ) );
+      MPI_Barrier(*std::get< 0 >( it_comm.second ));
+      MPI_Comm_disconnect( std::get< 0 >( it_comm.second ) );
+      delete std::get< 0 >( it_comm.second );
+      delete std::get< 1 >( it_comm.second );
+      delete[] std::get< 2 >( it_comm.second );
+      std::get< 2 >( it_comm.second ) = nullptr;
+    }
+    // clear map of devices
+    commMap_.clear();
+    thread thread_id_master = kernel().vp_manager.get_thread_id();
+    for ( auto& it_device : devices_[ thread_id_master ] )
+    {
+      it_device.second.first = nullptr;
+    }
+    delete[] *data_;
+  }
+#pragma omp barrier
+}
+
+
+void
 nest::StimulatingBackendMPIStream::update_device( std::vector< int >& devices_id, double* data )
 {
   // if there are some data
   thread thread_id = kernel().vp_manager.get_thread_id();
-  for (int i = 0; i < (int) devices_id.size(); i++)
+  for ( int i = 0; i < ( int ) devices_id.size(); i++ )
   {
-    devices_[ thread_id ].find( devices_id[i] )->second.second->set_data_from_stream_stimulating_backend( data[i] );
-  }
-}
-
-void
-nest::StimulatingBackendMPIStream::clean_memory_input_data( double** data )
-{
-  // for all the pairs of data, free the memory of data and the array with the size
-  for ( size_t i = 0; i != commMap_.size(); ++i )
-  {
-    delete[] data[ i ];
-    data[i] = nullptr;
+    devices_[ thread_id ].find( devices_id[ i ] )->second.second->set_data_from_stream_stimulating_backend( data[ i ] );
   }
 }

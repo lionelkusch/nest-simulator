@@ -101,7 +101,7 @@ nest::RecordingBackendMPIStream::prepare()
     std::vector< std::vector< int > > data_comm;
     for ( auto it_comm:commMap_ )
     {
-      std::vector< int > empty_vector( std::get< 2 >( it_comm.second ) );
+      std::vector< int > empty_vector( std::get< 2 >( it_comm.second ),0 );
       data_comm.push_back( empty_vector );
     }
     thread_data.swap( data_comm );

@@ -114,6 +114,8 @@ public:
 
   void pre_step_hook() override;
 
+  void cleanup() override;
+
 private:
   /**
    * Update all the devices with the data received
@@ -122,14 +124,9 @@ private:
    * @param data : the data received for updating all the devices
    */
   void update_device( std::vector< int >& devices_id, double* data );
-   /**
-   * clean all the memory allocated for the updating device. The function is used only by the master thread
-   * @param data
-   */
-  void clean_memory_input_data( double** data );
 
   int step_;
-
+  double*** data_;
 };
 
 } // namespace
