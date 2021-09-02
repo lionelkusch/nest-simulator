@@ -99,8 +99,8 @@ nest::StimulatingBackendMPIStream::prepare()
     LOG( M_INFO, "MPI Input connect", msg.str() );
   }
   step_ = 1;
-  double** data = { new double*[ commMap_.size() ]{} };
-  data_ = &data;
+  double** data = { new double*[ commMap_.size() ]{nullptr} };
+  data_ = { new double**[1]{data}};
 }
 
 void
@@ -123,7 +123,7 @@ nest::StimulatingBackendMPIStream::pre_step_hook()
       int shape = { *std::get<2>(it_comm.second) };
       double* data_receive{ new double[ shape ]{-1.0} };
       MPI_Recv( data_receive, shape, MPI_DOUBLE, 0, step_, *std::get< 0 >( it_comm.second), &status_mpi );
-      (*data_)[index] = data_receive;
+      data_[0][index] = data_receive;
       index += 1;
     }
     step_+=1;
@@ -133,14 +133,14 @@ nest::StimulatingBackendMPIStream::pre_step_hook()
   int index_it = 0;
   for ( auto& it_comm : commMap_ )
   {
-    update_device( *std::get< 1 >( it_comm.second ), ( *data_)[ index_it ] );
+    update_device( *std::get< 1 >( it_comm.second ), data_[0][ index_it ] );
     index_it += 1;
   }
 #pragma omp barrier
 #pragma omp master
   {
    for (int i=0; i < (int) commMap_.size(); i++){
-     delete[] (*data_)[i];
+     delete[] data_[0][i];
    }
   }
 }
