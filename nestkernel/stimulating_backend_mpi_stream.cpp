@@ -121,7 +121,7 @@ nest::StimulatingBackendMPIStream::pre_step_hook()
       // Receive the new value of device
       MPI_Status status_mpi;
       int shape = { *std::get<2>(it_comm.second) };
-      double* data_receive{ new double[ shape ]{} };
+      double* data_receive{ new double[ shape ]{-1.0} };
       MPI_Recv( data_receive, shape, MPI_DOUBLE, 0, step_, *std::get< 0 >( it_comm.second), &status_mpi );
       (*data_)[index] = data_receive;
       index += 1;
